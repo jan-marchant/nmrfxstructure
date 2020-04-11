@@ -1749,15 +1749,15 @@ public class Atom implements IAtom {
         if (!datasetActive.isPresent()) {
             datasetActive = Optional.of(new HashMap<>());
         }
-        datasetActive.get().put(Dataset,state);
+        datasetActive.get().put(dataset,state);
     }
 
-    public void getDataSetActive(Dataset dataset) {
+    public Boolean getDataSetActive(Dataset dataset) {
         Boolean state = false;
         if (datasetActive.isPresent()) {
             state = datasetActive.get().get(dataset);
         }
-        return state
+        return state;
     }
 
 
