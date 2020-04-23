@@ -17,7 +17,6 @@
  */
 package org.nmrfx.structure.chemistry;
 
-import org.nmrfx.processor.datasets.Dataset;
 import org.nmrfx.structure.chemistry.io.AtomParser;
 import java.util.*;
 import javax.vecmath.Point2d;
@@ -89,7 +88,6 @@ public class Atom implements IAtom {
     public String forceFieldCode = null;
     public float value = 0.0f;
     private boolean active = true;
-    Optional<Map<Dataset,Boolean>> datasetActive = Optional.empty();
     public ArrayList<AtomEquivalency> equivAtoms = null;
     public final SpatialSet spatialSet;
     AtomResonance resonance = null;
@@ -1744,22 +1742,6 @@ public class Atom implements IAtom {
         }
         return propValue;
     }
-
-    public void setDatasetActive(Dataset dataset, Boolean state) {
-        if (!datasetActive.isPresent()) {
-            datasetActive = Optional.of(new HashMap<>());
-        }
-        datasetActive.get().put(dataset,state);
-    }
-
-    public Boolean getDataSetActive(Dataset dataset) {
-        Boolean state = false;
-        if (datasetActive.isPresent()) {
-            state = datasetActive.get().get(dataset);
-        }
-        return state;
-    }
-
 
     @Override
     public String getSymbol() {
