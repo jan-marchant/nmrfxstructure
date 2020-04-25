@@ -649,16 +649,26 @@ public class Residue extends Compound {
                             }
                             if (valid) {
                                 bpCount++;
+                                }
+                                }
                             }
                         }
                     }
-                }
-            }
             if (bpCount == bp.atomPairs.length) {
                 return bp.type;
             }
         }
         return 0;
+    }
+    
+    public String getSSType() {
+        String type;
+        if (secStruct != null) {
+            type = secStruct.getName();
+        } else {
+            type = "";
+        }
+        return type;
     }
 
 }

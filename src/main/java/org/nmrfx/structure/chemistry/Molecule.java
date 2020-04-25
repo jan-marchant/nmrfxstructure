@@ -1133,6 +1133,22 @@ public class Molecule implements Serializable, ITree {
         return maxCount;
     }
 
+    public int getRefPPMSetCount() {
+        Iterator e = getSpatialSetIterator();
+        int maxCount = 1;
+        while (e.hasNext()) {
+            SpatialSet spatialSet = (SpatialSet) e.next();
+            if (spatialSet == null) {
+                continue;
+            }
+            int nSets = spatialSet.getRefPPMSetCount();
+            if (nSets > maxCount) {
+                maxCount = nSets;
+            }
+        }
+        return maxCount;
+    }
+
     public int selectResidues() {
         List<SpatialSet> selected = new ArrayList<>(256);
         TreeSet completedResidues = new TreeSet();
@@ -1897,7 +1913,7 @@ public class Molecule implements Serializable, ITree {
      * @return RealMatrix coordinates of the rotated axes
      */
     public RealMatrix calcSVDAxes(double[][] inputAxes) {
-        RealMatrix rotMat = getSVDRotationMatrix();
+        RealMatrix rotMat = getSVDRotationMatrix(true);
         RealMatrix inputAxesM = new Array2DRowRealMatrix(inputAxes);
         RealMatrix axes = rotMat.multiply(inputAxesM);
 
@@ -1912,20 +1928,43 @@ public class Molecule implements Serializable, ITree {
      * @return RealMatrix coordinates of the rotated axes
      */
     public RealMatrix getRDCAxes(double[][] inputAxes) {
-        RealMatrix rotMat = getRDCRotationMatrix();
-        RealMatrix inputAxesM = new Array2DRowRealMatrix(inputAxes);
-        RealMatrix axes = rotMat.multiply(inputAxesM);
-
-        return axes;
+        RealMatrix rotMat = getRDCRotationMatrix(true);
+        if (rotMat == null) {
+            return null;
+        } else {
+            RealMatrix inputAxesM = new Array2DRowRealMatrix(inputAxes);
+            RealMatrix axes = rotMat.multiply(inputAxesM);
+            return axes;
+        }
     }
 
-    public RealMatrix getRDCRotationMatrix() {
-        EigenDecomposition rdcEig = rdcResults.getEig();
-        RealMatrix rotMat = rdcEig.getVT();
-        return rotMat;
+    public RealMatrix getRDCRotationMatrix(boolean scaleMat) {
+        if (rdcResults == null) {
+            return null;
+        } else {
+            EigenDecomposition rdcEig = rdcResults.getEig();
+            double[] eigValues = rdcEig.getRealEigenvalues();
+            double maxEig = Double.NEGATIVE_INFINITY;
+            for (int i = 0; i < 3; i++) {
+                if (Math.abs(eigValues[i]) > maxEig) {
+                    maxEig = Math.abs(eigValues[i]);
+                }
+            }
+
+            RealMatrix rotMat = rdcEig.getVT().copy();
+            if (scaleMat) {
+                for (int i = 0; i < 3; i++) {
+                    double scale = eigValues[i] / maxEig;
+                    rotMat.setEntry(i, 0, rotMat.getEntry(i, 0) * scale);
+                    rotMat.setEntry(i, 1, rotMat.getEntry(i, 1) * scale);
+                    rotMat.setEntry(i, 2, rotMat.getEntry(i, 2) * scale);
+                }
+            }
+            return rotMat;
+        }
     }
 
-    public RealMatrix getSVDRotationMatrix() {
+    public RealMatrix getSVDRotationMatrix(boolean scaleMat) {
         Point3 pt;
         double[] c = new double[3];
         try {
@@ -1963,7 +2002,9 @@ public class Molecule implements Serializable, ITree {
         for (int i = 0; i < s.length; i++) {
             sMat.setEntry(i, i, sMat.getEntry(i, i) * maxX);
         }
-        rotMat = rotMat.preMultiply(sMat);
+        if (scaleMat) {
+            rotMat = rotMat.preMultiply(sMat);
+        }
         return rotMat;
     }
 
@@ -2542,114 +2583,6 @@ public class Molecule implements Serializable, ITree {
                 }
             }
         }
-    }
-
-    public List<Residue> RNAresidues() { //list of only rna residues 
-        List<Residue> RNAresidues = new ArrayList();
-        for (Polymer polymer : getPolymers()) {
-            if (polymer.isRNA()) {
-                for (Residue res : polymer.getResidues()) {
-                    RNAresidues.add(res);
-                }
-            }
-        }
-        return RNAresidues;
-    }
-
-    public List<BasePair> pairList() { //for RNA only
-        List<BasePair> bpList = new ArrayList();
-        List<Residue> RNAresidues = RNAresidues();
-        for (Residue residueA : RNAresidues) {
-            for (Residue residueB : RNAresidues) {
-                if (residueA.getResNum() < residueB.getResNum()) {
-                    int type = residueA.basePairType(residueB);
-                    if (type == 1) {
-                        BasePair bp = new BasePair(residueA, residueB);
-                        bpList.add(bp);
-
-                    }
-                }
-            }
-        }
-        return bpList;
-    }
-
-    public HashMap<Integer, List<BasePair>> allBasePairsMap() {
-        HashMap<Integer, List<BasePair>> bpMap = new HashMap<Integer, List<BasePair>>();
-        BasePair currentBp = null;
-        int i = 0;
-        List<BasePair> crossedPairs = new ArrayList();
-        List<BasePair> bpList = pairList();
-        for (BasePair bp1 : bpList) {
-            for (BasePair bp2 : bpList) {
-                if (bp1.res1.iRes < bp2.res1.iRes && bp1.res2.iRes < bp2.res2.iRes && bp1.res2.iRes > bp2.res1.iRes) {
-                    if (currentBp != bp2) {
-                        bpMap.put(i, crossedPairs);
-                        i++;
-                        crossedPairs.clear();
-                        crossedPairs.add(bp1);
-                        currentBp = bp2;
-                        break;
-
-                    } else {
-                        crossedPairs.add(bp1);
-                        currentBp = bp2;
-                        break;
-                    }
-                }
-            }
-        }
-        return bpMap;
-    }
-
-    public char[] getViennaSequence() { //pseudoknots
-        HashMap<Integer, List<BasePair>> allBpMap = allBasePairsMap();
-        List<BasePair> bps = pairList();
-        List<Residue> RNAresidues = RNAresidues();
-        char[] vienna = new char[RNAresidues.size()];
-        String leftBrackets = "[{";
-        String rightBrackets = "]}";
-        for (int i = 0; i < vienna.length; i++) {
-            vienna[i] = '.';
-        }
-        for (BasePair bp : bps) {
-            vienna[bp.res1.iRes] = '(';
-            vienna[bp.res2.iRes] = ')';
-        }
-        if (!allBpMap.isEmpty()) {
-            for (Map.Entry<Integer, List<BasePair>> crossMap : allBpMap.entrySet()) {
-                for (BasePair bp : crossMap.getValue()) {
-                    vienna[bp.res1.iRes] = leftBrackets.charAt(crossMap.getKey());
-                    vienna[bp.res2.iRes] = rightBrackets.charAt(crossMap.getKey());
-                }
-
-            }
-        }
-        return vienna;
-    }
-
-    public char[] testViennaSequence() { //for testing
-        HashMap<Integer, List<BasePair>> bpMap = allBasePairsMap();
-        List<Residue> RNAresidues = RNAresidues();
-        char[] vienna = new char[RNAresidues.size()];
-        String leftBrackets = "[{";
-        String rightBrackets = "]}";
-        for (int i = 0; i < vienna.length; i++) {
-            vienna[i] = '.';
-        }
-        for (Residue residueA : RNAresidues) {
-            if (residueA.pairedTo != null && residueA.iRes < residueA.pairedTo.iRes) {
-                vienna[residueA.iRes] = '(';
-                vienna[residueA.pairedTo.iRes] = ')';
-            }
-        }
-        for (Map.Entry<Integer, List<BasePair>> crossMap : bpMap.entrySet()) {
-            for (BasePair bp : crossMap.getValue()) {
-                vienna[bp.res1.iRes] = leftBrackets.charAt(crossMap.getKey());
-                vienna[bp.res2.iRes] = rightBrackets.charAt(crossMap.getKey());
-            }
-        }
-        return vienna;
     }
 
     public void calcLCMB(final int iStruct) {
