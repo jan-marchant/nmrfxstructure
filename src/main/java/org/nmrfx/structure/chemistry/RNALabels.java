@@ -32,7 +32,7 @@ public class RNALabels {
     static Pattern pattern3 = Pattern.compile("([^:]+):?");
 
     static Pattern pattern4 = Pattern.compile("(\\w+):([ACGU](,[ACGU])*)?([0-9]+)?-?([0-9]+)?\\.([a-zA-Z]+\\w*)");
-    static Pattern pattern = Pattern.compile("(\\*|\\w+):([ACGU](,[ACGU])*)?((([0-9]+)?-?([0-9]+)?)|\\*)\\.(([HCN][^, ]*)(,[HCN][^, ]*)*)$");
+    static Pattern pattern = Pattern.compile("(\\*|\\w+):([ACGU](,[ACGU])*)?((([0-9]+)?-?([0-9]+)?)|\\*)\\.(([HCN][^, :]*)(,[HCN][^, :]*)*)(:([0-9]+))?$");
 
     public void parse(Molecule molecule, String selGroup) {
         String[] groups = selGroup.split(" ");
@@ -209,6 +209,118 @@ public class RNALabels {
         }
     }
 
+    public static Boolean isAtomInLabelString(Atom atom, String labelString) {
+        if ((labelString == null) || (labelString.trim().length() == 0)) {
+            return true;
+        } else {
+            String[] selGroupSets = labelString.split(";");
+            for (String selGroupSet : selGroupSets) {
+                String[] groups = selGroupSet.split(" ");
+                for (String group : groups) {
+                    group = group.trim();
+                    if (group.length() > 0) {
+                        if (isAtomInSingleLabelString(atom, group)) {
+                            return true;
+                        };
+                    }
+                }
+            }
+            return false;
+        }
+    }
+
+    public static Boolean isAtomInSingleLabelString(Atom atom, String group) {
+        SelGroup selGroup = parseSelGroup(group);
+        String entityStr = selGroup.entityStr;
+        Entity entity=atom.getEntity();
+        if (entity instanceof Residue) {
+            Residue residue = (Residue) entity;
+            Polymer polymer = residue.polymer;
+            if (entityStr.equals("*") || entityStr.equals(polymer.getName())) {
+                String resName = residue.getName();
+                String resNumStr = residue.getNumber();
+
+                int resNum = Integer.parseInt(resNumStr);
+                boolean resMatches = checkResType(resName, selGroup.resTypes);
+
+                if (resMatches) {
+                    if ((selGroup.firstRes != null) && (resNum < selGroup.firstRes)) {
+                        return false;
+                    }
+                    if ((selGroup.lastRes != null) && (resNum > selGroup.lastRes)) {
+                        return false;
+                    }
+                    //could do this earlier. probably not worth it.
+                    NucleicAcidAtomType naType = new NucleicAcidAtomType(atom);
+                    if (naType.hydroxyl) {
+                        return false;
+                    }
+                    boolean ok = checkAtom(atom.getName(), atom.getElementName(), selGroup.gAtomNames, naType.sugar, naType.exchangable);
+                    if (ok) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public static Integer atomPercentLabelString(Atom atom, String labelString) {
+        Integer result = 0;
+        if ((labelString == null) || (labelString.trim().length() == 0)) {
+            return 100;
+        } else {
+            String[] selGroupSets = labelString.split(";");
+            for (String selGroupSet : selGroupSets) {
+                String[] groups = selGroupSet.split(" ");
+                for (String group : groups) {
+                    group = group.trim();
+                    if (group.length() > 0) {
+                        result+=atomPercentInSingleLabelString(atom, group);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    public static Integer atomPercentInSingleLabelString(Atom atom, String group) {
+        SelGroup selGroup = parseSelGroup(group);
+        String entityStr = selGroup.entityStr;
+        Entity entity=atom.getEntity();
+        if (entity instanceof Residue) {
+            Residue residue = (Residue) entity;
+            Polymer polymer = residue.polymer;
+            if (entityStr.equals("*") || entityStr.equals(polymer.getName())) {
+                String resName = residue.getName();
+                String resNumStr = residue.getNumber();
+
+                int resNum = Integer.parseInt(resNumStr);
+                boolean resMatches = checkResType(resName, selGroup.resTypes);
+
+                if (resMatches) {
+                    if ((selGroup.firstRes != null) && (resNum < selGroup.firstRes)) {
+                        return 0;
+                    }
+                    if ((selGroup.lastRes != null) && (resNum > selGroup.lastRes)) {
+                        return 0;
+                    }
+                    //could do this earlier. probably not worth it.
+                    NucleicAcidAtomType naType = new NucleicAcidAtomType(atom);
+                    if (naType.hydroxyl) {
+                        return 0;
+                    }
+                    boolean ok = checkAtom(atom.getName(), atom.getElementName(), selGroup.gAtomNames, naType.sugar, naType.exchangable);
+                    if (ok) {
+                        return selGroup.labelingPercent;
+                    }
+                }
+            }
+        }
+        return 0;
+    }
+
+
     public static class NucleicAcidAtomType {
 
         final boolean hydroxyl;
@@ -238,16 +350,18 @@ public class RNALabels {
 
         public final Integer firstRes;
         public final Integer lastRes;
+        public final Integer labelingPercent;
         public final String entityStr;
         public final String[] resTypes;
         public final String[] gAtomNames;
 
-        SelGroup(Integer startRes, Integer endRes, String entityStr, String[] resTypes, String[] gAtomNames) {
+        SelGroup(Integer startRes, Integer endRes, String entityStr, String[] resTypes, String[] gAtomNames,Integer labelingPercent) {
             this.firstRes = startRes;
             this.lastRes = endRes;
             this.entityStr = entityStr;
             this.resTypes = resTypes;
             this.gAtomNames = gAtomNames;
+            this.labelingPercent = labelingPercent;
         }
     }
 
@@ -263,6 +377,13 @@ public class RNALabels {
         String resRangeStr = matcher.group(4);
         String startResStr = matcher.group(6);
         String endResStr = matcher.group(7);
+        int labelPercent;
+        String labelPercentStr = matcher.group(12);
+        try {
+            labelPercent=Integer.parseInt(labelPercentStr);
+        } catch (Exception e) {
+            labelPercent=100;
+        }
         if ((startResStr != null) && (startResStr.length() > 0)) {
             startRes = Integer.parseInt(startResStr);
         }
@@ -279,7 +400,7 @@ public class RNALabels {
             entityStr = "*";
         }
 
-        SelGroup selGroup = new SelGroup(startRes, endRes, entityStr, resTypes, gAtomNames);
+        SelGroup selGroup = new SelGroup(startRes, endRes, entityStr, resTypes, gAtomNames, labelPercent);
         return selGroup;
 
     }
