@@ -265,8 +265,8 @@ public class RNALabels {
         return false;
     }
 
-    public static Integer atomPercentLabelString(Atom atom, String labelString) {
-        Integer result = 0;
+    public static float atomPercentLabelString(Atom atom, String labelString) {
+        float result = 0;
         if ((labelString == null) || (labelString.trim().length() == 0)) {
             return 100;
         } else {
@@ -284,7 +284,7 @@ public class RNALabels {
         return result;
     }
 
-    public static Integer atomPercentInSingleLabelString(Atom atom, String group) {
+    public static float atomPercentInSingleLabelString(Atom atom, String group) {
         SelGroup selGroup = parseSelGroup(group);
         String entityStr = selGroup.entityStr;
         Entity entity=atom.getEntity();
@@ -350,12 +350,12 @@ public class RNALabels {
 
         public final Integer firstRes;
         public final Integer lastRes;
-        public final Integer labelingPercent;
+        public final float labelingPercent;
         public final String entityStr;
         public final String[] resTypes;
         public final String[] gAtomNames;
 
-        SelGroup(Integer startRes, Integer endRes, String entityStr, String[] resTypes, String[] gAtomNames,Integer labelingPercent) {
+        SelGroup(Integer startRes, Integer endRes, String entityStr, String[] resTypes, String[] gAtomNames,float labelingPercent) {
             this.firstRes = startRes;
             this.lastRes = endRes;
             this.entityStr = entityStr;
@@ -377,10 +377,10 @@ public class RNALabels {
         String resRangeStr = matcher.group(4);
         String startResStr = matcher.group(6);
         String endResStr = matcher.group(7);
-        int labelPercent;
+        float labelPercent;
         String labelPercentStr = matcher.group(12);
         try {
-            labelPercent=Integer.parseInt(labelPercentStr);
+            labelPercent=Float.parseFloat(labelPercentStr);
         } catch (Exception e) {
             labelPercent=100;
         }

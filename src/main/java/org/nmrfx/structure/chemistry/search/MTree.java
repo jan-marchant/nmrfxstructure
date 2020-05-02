@@ -22,7 +22,7 @@ import org.nmrfx.structure.chemistry.ring.Ring;
 
 public class MTree {
 
-    Vector nodes = null;
+    public Vector<MNode> nodes = null;
     MNode lastRotatable = null;
     ArrayList<MNode> pathNodes = new ArrayList<>();
 

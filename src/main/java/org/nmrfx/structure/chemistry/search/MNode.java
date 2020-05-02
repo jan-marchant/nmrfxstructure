@@ -22,7 +22,7 @@ import java.util.*;
 
 public class MNode implements Comparable, Comparator {
 
-    ArrayList nodes = null;
+    public ArrayList nodes = null;
     int id = -1;
     int shell = -1;
     int value = 0;

@@ -4883,4 +4883,21 @@ public class Molecule implements Serializable, ITree {
         }
         // setupAngles();
     }
+    private List<Entity> getResiduesAndCompounds() {
+        List<Polymer> polymers = getPolymers();
+        ArrayList<Compound> compounds = getLigands();
+        List<Entity> entities = new ArrayList<>();
+        for (Polymer polymer : polymers) {
+            List<Residue> residues = polymer.getResidues();
+            for (Residue residue : residues) {
+                entities.add(residue);
+            }
+        }
+
+        for (Compound compound : compounds) {
+            entities.add(compound);
+        }
+        return entities;
+    }
+
 }
