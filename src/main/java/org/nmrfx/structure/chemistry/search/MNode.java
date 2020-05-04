@@ -22,7 +22,9 @@ import java.util.*;
 
 public class MNode implements Comparable, Comparator {
 
-    public ArrayList nodes = null;
+    public ArrayList<MNode> nodes = null;
+    public ArrayList<Integer> weights = new ArrayList<>();
+    public
     int id = -1;
     int shell = -1;
     int value = 0;
@@ -44,7 +46,7 @@ public class MNode implements Comparable, Comparator {
     }
 
     public MNode() {
-        nodes = new ArrayList();
+        nodes = new ArrayList<>();
         this.id = -1;
     }
 
@@ -55,6 +57,12 @@ public class MNode implements Comparable, Comparator {
 
     public void addNode(MNode iNode) {
         nodes.add(iNode);
+        weights.add(1);
+    }
+
+    public void addNode(MNode iNode, Integer weight) {
+        nodes.add(iNode);
+        weights.add(weight);
     }
 
     public void setValue(int i) {

@@ -51,6 +51,15 @@ public class MTree {
         }
     }
 
+    public void addEdge(int i, int j, boolean sym, Integer weight) {
+        MNode iNode = (MNode) nodes.elementAt(i);
+        MNode jNode = (MNode) nodes.elementAt(j);
+        iNode.addNode(jNode,weight);
+        if (sym) {
+            jNode.addNode(iNode,weight);
+        }
+    }
+
     public void sortNodes() {
         int nNodes = nodes.size();
 
