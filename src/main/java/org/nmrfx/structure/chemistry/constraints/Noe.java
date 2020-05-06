@@ -17,6 +17,7 @@
  */
 package org.nmrfx.structure.chemistry.constraints;
 
+import org.nmrfx.processor.datasets.peaks.AtomResonance;
 import org.nmrfx.structure.chemistry.*;
 import org.nmrfx.processor.datasets.peaks.Peak;
 import org.nmrfx.processor.datasets.peaks.PeakList;
@@ -106,6 +107,10 @@ public class Noe implements Constraint, Serializable {
     public SpatialSetGroup spg1;
     public SpatialSetGroup spg2;
     public Peak peak = null;
+    //I suspect this fails because of multiple potential atoms per peak. Need to be a resonance set I guess.
+    public AtomResonance resonance1;
+    public AtomResonance resonance2;
+    public int dim2;
     private double intensity = 0.0;
     private double volume = 0.0;
     private double scale = 1.0;

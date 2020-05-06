@@ -18,6 +18,8 @@
 package org.nmrfx.structure.chemistry.search;
 
 import java.util.*;
+
+import org.nmrfx.structure.chemistry.Atom;
 import org.nmrfx.structure.chemistry.ring.Ring;
 
 public class MTree {
@@ -25,6 +27,35 @@ public class MTree {
     public Vector<MNode> nodes = null;
     MNode lastRotatable = null;
     ArrayList<MNode> pathNodes = new ArrayList<>();
+
+    public MTree copy() {
+        MTree copy=new MTree();
+        HashMap<MNode,MNode> nodeMap=new HashMap<>();
+        for (MNode node : nodes) {
+            MNode copyNode = node.copy(node.id);
+            copy.nodes.add(copyNode);
+            nodeMap.put(node, copyNode);
+            if (node == lastRotatable) {
+                copy.lastRotatable = node;
+            }
+        }
+        for (MNode node : nodes) {
+            MNode copyNode=nodeMap.get(node);
+            copyNode.parent=nodeMap.get(node.parent);
+            copyNode.lastRotatable=nodeMap.get(node.lastRotatable);
+            for (MNode connectedNode : node.nodes) {
+                copyNode.nodes.add(nodeMap.get(connectedNode));
+            }
+            for (MNode connectedNode : node.weightedEdges.keySet()) {
+                copyNode.weightedEdges.put(nodeMap.get(connectedNode),node.weightedEdges.get(connectedNode));
+            }
+            copyNode.weights.addAll(node.weights);
+        }
+        for (MNode pathNode : pathNodes) {
+            copy.pathNodes.add(nodeMap.get(pathNode));
+        }
+        return copy;
+    }
 
     public MTree() {
         nodes = new Vector();
@@ -36,6 +67,10 @@ public class MTree {
         nodes.add(node);
 
         return (node);
+    }
+
+    public Vector<MNode> getNodes() {
+        return nodes;
     }
 
     public void addEdge(int i, int j) {

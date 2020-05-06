@@ -17,6 +17,8 @@
  */
 package org.nmrfx.structure.chemistry.constraints;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.nmrfx.processor.datasets.peaks.Peak;
 import org.nmrfx.processor.datasets.peaks.PeakList;
 import java.util.*;
@@ -52,7 +54,7 @@ public class NoeSet implements ConstraintSet, Iterable {
     static NoeSet ACTIVE_SET () {
         return StructureProject.getActive().ACTIVE_SET;
     }
-    private final List<Noe> constraints = new ArrayList<>(64);
+    private final ObservableList<Noe> constraints = FXCollections.observableArrayList();
     private final Map<Peak, List<Noe>> peakMap = new TreeMap<>();
     private final Map<PeakList, NoeCalibration> scaleMap = new HashMap<>();
     private final String name;
@@ -145,7 +147,7 @@ public class NoeSet implements ConstraintSet, Iterable {
         dirty = true;
     }
 
-    public List<Noe> get() {
+    public ObservableList<Noe> get() {
         return constraints;
     }
 
