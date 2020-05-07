@@ -19,7 +19,6 @@ package org.nmrfx.structure.chemistry.search;
 
 import java.util.*;
 
-import org.nmrfx.structure.chemistry.Atom;
 import org.nmrfx.structure.chemistry.ring.Ring;
 
 public class MTree {
@@ -46,8 +45,11 @@ public class MTree {
             for (MNode connectedNode : node.nodes) {
                 copyNode.nodes.add(nodeMap.get(connectedNode));
             }
-            for (MNode connectedNode : node.weightedEdges.keySet()) {
-                copyNode.weightedEdges.put(nodeMap.get(connectedNode),node.weightedEdges.get(connectedNode));
+            for (MNode connectedNode : node.forwardWeightedEdges.keySet()) {
+                copyNode.forwardWeightedEdges.put(nodeMap.get(connectedNode),node.forwardWeightedEdges.get(connectedNode));
+            }
+            for (MNode connectedNode : node.backwardWeightedEdges.keySet()) {
+                copyNode.backwardWeightedEdges.put(nodeMap.get(connectedNode),node.backwardWeightedEdges.get(connectedNode));
             }
             copyNode.weights.addAll(node.weights);
         }

@@ -23,7 +23,8 @@ import java.util.*;
 public class MNode implements Comparable, Comparator {
 
     public ArrayList<MNode> nodes = null;
-    public HashMap<MNode,Double> weightedEdges = new HashMap<>();
+    public HashMap<MNode,Double> forwardWeightedEdges = new HashMap<>();
+    public HashMap<MNode,Double> backwardWeightedEdges = new HashMap<>();
     public ArrayList<Integer> weights = new ArrayList<>();
     public
     int id = -1;
