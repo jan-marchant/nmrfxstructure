@@ -22,11 +22,7 @@ import java.util.*;
 
 public class MNode implements Comparable, Comparator {
 
-    public ArrayList<MNode> nodes = null;
-    public HashMap<MNode,Double> forwardWeightedEdges = new HashMap<>();
-    public HashMap<MNode,Double> backwardWeightedEdges = new HashMap<>();
-    public ArrayList<Integer> weights = new ArrayList<>();
-    public
+    ArrayList<MNode> nodes = null;
     int id = -1;
     int shell = -1;
     int value = 0;
@@ -38,16 +34,18 @@ public class MNode implements Comparable, Comparator {
     MNode lastRotatable = null;
     boolean ringClosure = false;
 
-    public MNode copy(int id) {
-        MNode copyNode=new MNode(id);
-        copyNode.shell=shell;
-        copyNode.value=value;
-        copyNode.pathPos=pathPos;
-        copyNode.atom=atom;
-        copyNode.indexInShell=indexInShell;
-        copyNode.maxShell=maxShell;
-        copyNode.ringClosure=ringClosure;
-        return copyNode;
+    public ArrayList<MNode> getNodes() {
+        return nodes;
+    }
+
+    public void copy(MNode destination) {
+        destination.shell=shell;
+        destination.value=value;
+        destination.pathPos=pathPos;
+        destination.atom=atom;
+        destination.indexInShell=indexInShell;
+        destination.maxShell=maxShell;
+        destination.ringClosure=ringClosure;
     }
 
     @Override
@@ -60,7 +58,7 @@ public class MNode implements Comparable, Comparator {
     }
 
     public MNode() {
-        nodes = new ArrayList<>();
+        nodes = new ArrayList();
         this.id = -1;
     }
 
@@ -71,12 +69,6 @@ public class MNode implements Comparable, Comparator {
 
     public void addNode(MNode iNode) {
         nodes.add(iNode);
-        weights.add(1);
-    }
-
-    public void addNode(MNode iNode, Integer weight) {
-        nodes.add(iNode);
-        weights.add(weight);
     }
 
     public void setValue(int i) {

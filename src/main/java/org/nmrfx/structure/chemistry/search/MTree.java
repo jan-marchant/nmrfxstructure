@@ -18,49 +18,16 @@
 package org.nmrfx.structure.chemistry.search;
 
 import java.util.*;
-
 import org.nmrfx.structure.chemistry.ring.Ring;
 
 public class MTree {
 
-    public Vector<MNode> nodes = null;
+    ArrayList<MNode> nodes = null;
     MNode lastRotatable = null;
     ArrayList<MNode> pathNodes = new ArrayList<>();
 
-    public MTree copy() {
-        MTree copy=new MTree();
-        HashMap<MNode,MNode> nodeMap=new HashMap<>();
-        for (MNode node : nodes) {
-            MNode copyNode = node.copy(node.id);
-            copy.nodes.add(copyNode);
-            nodeMap.put(node, copyNode);
-            if (node == lastRotatable) {
-                copy.lastRotatable = node;
-            }
-        }
-        for (MNode node : nodes) {
-            MNode copyNode=nodeMap.get(node);
-            copyNode.parent=nodeMap.get(node.parent);
-            copyNode.lastRotatable=nodeMap.get(node.lastRotatable);
-            for (MNode connectedNode : node.nodes) {
-                copyNode.nodes.add(nodeMap.get(connectedNode));
-            }
-            for (MNode connectedNode : node.forwardWeightedEdges.keySet()) {
-                copyNode.forwardWeightedEdges.put(nodeMap.get(connectedNode),node.forwardWeightedEdges.get(connectedNode));
-            }
-            for (MNode connectedNode : node.backwardWeightedEdges.keySet()) {
-                copyNode.backwardWeightedEdges.put(nodeMap.get(connectedNode),node.backwardWeightedEdges.get(connectedNode));
-            }
-            copyNode.weights.addAll(node.weights);
-        }
-        for (MNode pathNode : pathNodes) {
-            copy.pathNodes.add(nodeMap.get(pathNode));
-        }
-        return copy;
-    }
-
     public MTree() {
-        nodes = new Vector();
+        nodes = new ArrayList<>();
     }
 
     public MNode addNode() {
@@ -71,7 +38,43 @@ public class MTree {
         return (node);
     }
 
-    public Vector<MNode> getNodes() {
+    public MTree copy() {
+        MTree copy=new MTree();
+        copyNodes(copy);
+        return copy;
+    }
+
+    public void copyNodes (MTree destination) {
+        HashMap<MNode, MNode> nodeMap = new HashMap<>();
+        for (MNode node : this.getNodes()) {
+            MNode copyNode = new MNode(node.id);
+            node.copy(copyNode);
+            destination.nodes.add(copyNode);
+            nodeMap.put(node, copyNode);
+        }
+        copyNodeConnections(destination,nodeMap);
+    }
+
+    public void copyNodeConnections(MTree destination,HashMap<? extends MNode,? extends MNode> nodeMap) {
+        for (MNode node : this.getNodes()) {
+            if (node == this.lastRotatable) {
+                destination.lastRotatable = node;
+            }
+        }
+        for (MNode node : this.nodes) {
+            MNode copyNode=nodeMap.get(node);
+            copyNode.parent=nodeMap.get(node.parent);
+            copyNode.lastRotatable=nodeMap.get(node.lastRotatable);
+            for (MNode connectedNode : node.nodes) {
+                copyNode.nodes.add(nodeMap.get(connectedNode));
+            }
+        }
+        for (MNode pathNode : this.pathNodes) {
+            destination.pathNodes.add(nodeMap.get(pathNode));
+        }
+    }
+
+    public ArrayList<? extends MNode> getNodes() {
         return nodes;
     }
 
@@ -80,20 +83,11 @@ public class MTree {
     }
 
     public void addEdge(int i, int j, boolean sym) {
-        MNode iNode = (MNode) nodes.elementAt(i);
-        MNode jNode = (MNode) nodes.elementAt(j);
+        MNode iNode = (MNode) nodes.get(i);
+        MNode jNode = (MNode) nodes.get(j);
         iNode.addNode(jNode);
         if (sym) {
             jNode.addNode(iNode);
-        }
-    }
-
-    public void addEdge(int i, int j, boolean sym, Integer weight) {
-        MNode iNode = (MNode) nodes.elementAt(i);
-        MNode jNode = (MNode) nodes.elementAt(j);
-        iNode.addNode(jNode,weight);
-        if (sym) {
-            jNode.addNode(iNode,weight);
         }
     }
 
@@ -101,7 +95,7 @@ public class MTree {
         int nNodes = nodes.size();
 
         for (int j = 0; j < nNodes; j++) {
-            MNode cNode = (MNode) nodes.elementAt(j);
+            MNode cNode = (MNode) nodes.get(j);
             cNode.sortNodes();
         }
     }
@@ -121,14 +115,14 @@ public class MTree {
         MNode nNode = null;
 
         for (int j = 0; j < nNodes; j++) {
-            cNode = (MNode) nodes.elementAt(j);
+            cNode = (MNode) nodes.get(j);
             cNode.shell = -1;
             cNode.parent = null;
             cNode.pathPos = -1;
             cNode.ringClosure = false;
         }
 
-        cNode = (MNode) nodes.elementAt(iStart);
+        cNode = (MNode) nodes.get(iStart);
         cNode.shell = 0;
         path[0] = iStart;
         pathNodes.add(cNode);
@@ -138,11 +132,11 @@ public class MTree {
             }
 
             m = path[j];
-            cNode = (MNode) nodes.elementAt(m);
+            cNode = (MNode) nodes.get(m);
 
             for (int i = 0; i < cNode.nodes.size(); i++) {
                 next = ((MNode) cNode.nodes.get(i)).getID();
-                nNode = (MNode) nodes.elementAt(next);
+                nNode = (MNode) nodes.get(next);
                 if (nNode.shell == -1) {
                     //System.out.println(j+" "+i+" "+m+" "+nodesAdded+" "+next+" "+cNode.shell);
                     path[nodesAdded++] = next;
@@ -182,14 +176,14 @@ public class MTree {
         MNode nNode = null;
 
         for (int j = 0; j < nNodes; j++) {
-            cNode = (MNode) nodes.elementAt(j);
+            cNode = (MNode) nodes.get(j);
             cNode.shell = -1;
             cNode.parent = null;
             cNode.pathPos = -1;
             cNode.ringClosure = false;
         }
 
-        cNode = (MNode) nodes.elementAt(iStart);
+        cNode = (MNode) nodes.get(iStart);
         cNode.shell = 0;
         path[0] = iStart;
         pathNodes.add(cNode);
@@ -199,13 +193,13 @@ public class MTree {
                 return (path);
             }
             m = (path[j] & 0xFF);
-            cNode = (MNode) nodes.elementAt(m);
+            cNode = (MNode) nodes.get(m);
             List<Ring> cNodeRings = (List) cNode.getAtom().getProperty("rings");
             for (int i = 0; i < cNode.nodes.size(); i++) {
                 boolean branchingRing = false;
 
                 next = ((MNode) cNode.nodes.get(i)).getID();
-                nNode = (MNode) nodes.elementAt(next);
+                nNode = (MNode) nodes.get(next);
                 if (nNode.shell == -1) {
                     List<Ring> nNodeRings = (List) nNode.getAtom().getProperty("rings");
                     if (nNodeRings != null) {
@@ -325,11 +319,11 @@ public class MTree {
         MNode nNode = null;
 
         for (int j = 0; j < nNodes; j++) {
-            cNode = (MNode) nodes.elementAt(j);
+            cNode = (MNode) nodes.get(j);
             cNode.shell = -1;
         }
 
-        cNode = (MNode) nodes.elementAt(iStart);
+        cNode = (MNode) nodes.get(iStart);
 
         //cNode.shell=0;
         path[0] = 0;
@@ -345,7 +339,7 @@ public class MTree {
             // System.out.println(" j "+j+" "+nodesAdded);
             // m is the node index (and cNode the node with that index) in the path to be checked during this iteration
             m = (path[(j * 2) + 1] & 0xFF);
-            cNode = (MNode) nodes.elementAt(m);
+            cNode = (MNode) nodes.get(m);
 
             if (cNode.shell != -1) {
                 j++;
@@ -359,7 +353,7 @@ public class MTree {
             // Loop over all the nodes connected to the current node
             for (int i = 0; i < cNode.nodes.size(); i++) {
                 next = ((MNode) cNode.nodes.get(i)).getID();
-                nNode = (MNode) nodes.elementAt(next);
+                nNode = (MNode) nodes.get(next);
 
                 // only add edges to nodes that haven't been an origin node (those with shell == -1)
                 if (nNode.shell == -1) {
@@ -391,11 +385,11 @@ public class MTree {
         int [] iPath;
         if (nNodes != 0) {
             for (int j = 0; j < nNodes; j++) {
-                MNode cNode = (MNode) nodes.elementAt(j);
+                MNode cNode = (MNode) nodes.get(j);
                 cNode.shell = -1;
             }
 
-            MNode sNode = (MNode) nodes.elementAt(start);
+            MNode sNode = (MNode) nodes.get(start);
             pathNodes.add(sNode);
             sNode.shell = 0;
             depthFirstPath(sNode, pathNodes);

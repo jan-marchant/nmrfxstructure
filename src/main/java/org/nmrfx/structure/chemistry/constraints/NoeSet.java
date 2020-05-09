@@ -42,6 +42,8 @@ import org.nmrfx.structure.utilities.Util;
  */
 public class NoeSet implements ConstraintSet, Iterable {
 
+    public Molecule molecule;
+    public int ppmSet=1;
     private static double SYM_BONUS = 10.0;
     private static double CMAX = 5.5;
     private static double CMAX_BONUS = 10.0;
@@ -68,6 +70,12 @@ public class NoeSet implements ConstraintSet, Iterable {
 
     public NoeSet(String name) {
         this.name = name;
+    }
+
+    public NoeSet(String name,Molecule molecule,int ppmSet) {
+        this.name = name;
+        this.molecule=molecule;
+        this.ppmSet=ppmSet;
     }
 
     public static NoeSet addSet(String name) {
