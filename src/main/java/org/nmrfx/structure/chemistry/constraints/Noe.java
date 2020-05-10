@@ -18,6 +18,7 @@
 package org.nmrfx.structure.chemistry.constraints;
 
 import org.nmrfx.processor.datasets.peaks.AtomResonance;
+import org.nmrfx.processor.datasets.peaks.PeakDim;
 import org.nmrfx.structure.chemistry.*;
 import org.nmrfx.processor.datasets.peaks.Peak;
 import org.nmrfx.processor.datasets.peaks.PeakList;
@@ -107,10 +108,6 @@ public class Noe implements Constraint, Serializable {
     public SpatialSetGroup spg1;
     public SpatialSetGroup spg2;
     public Peak peak = null;
-    //I suspect this fails because of multiple potential atoms per peak. Need to be a resonance set I guess.
-    public AtomResonance resonance1;
-    public AtomResonance resonance2;
-    public int dim2;
     private double intensity = 0.0;
     private double volume = 0.0;
     private double scale = 1.0;
@@ -135,6 +132,16 @@ public class Noe implements Constraint, Serializable {
     private static DisTypes distanceType = DisTypes.MINIMUM;
     private GenTypes genType = GenTypes.MANUAL;
     public static int ppmSet = 0;
+    private PeakDim peakDim1=null;
+    private PeakDim peakDim2=null;
+
+    public PeakDim getPeakDim1() {
+        return peakDim1;
+    }
+
+    public PeakDim getPeakDim2() {
+        return peakDim2;
+    }
 
     public Noe(Peak p, SpatialSet sp1, SpatialSet sp2, double newScale) {
         SpatialSetGroup spg1t = new SpatialSetGroup(sp1);
@@ -148,6 +155,23 @@ public class Noe implements Constraint, Serializable {
         peak = p;
         scale = newScale;
         activeFlags = EnumSet.noneOf(Flags.class);
+
+    }
+
+    public Noe(Peak p, SpatialSet sp1, SpatialSet sp2, double newScale, PeakDim pD1, PeakDim pD2) {
+        SpatialSetGroup spg1t = new SpatialSetGroup(sp1);
+        SpatialSetGroup spg2t = new SpatialSetGroup(sp2);
+        this.spg1 = spg1t;
+        this.spg2 = spg2t;
+        if (spg1t.compare(spg2t) >= 0) {
+            swapped = true;
+        }
+
+        peak = p;
+        scale = newScale;
+        activeFlags = EnumSet.noneOf(Flags.class);
+        peakDim1=pD1;
+        peakDim2=pD2;
 
     }
 
