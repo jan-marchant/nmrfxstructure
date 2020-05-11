@@ -698,6 +698,18 @@ public class Noe implements Constraint, Serializable {
         return atoms;
     }
 
+    public void setPeak(Peak peak) {
+        this.peak=peak;
+        for (PeakDim peakDim : peak.getPeakDims()) {
+            if (((AtomResonance) peakDim.getResonance()).getAtom()==spg1.getAnAtom()) {
+                peakDim1=peakDim;
+            }
+            if (((AtomResonance) peakDim.getResonance()).getAtom()==spg2.getAnAtom()) {
+                peakDim2=peakDim;
+            }
+        }
+    }
+
     static class NoeMatch {
 
         final SpatialSet sp1;
