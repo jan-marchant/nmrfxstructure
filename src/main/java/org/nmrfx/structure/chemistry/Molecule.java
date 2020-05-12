@@ -248,6 +248,11 @@ public class Molecule implements Serializable, ITree {
         storeMolecule();
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
+
     final void storeMolecule() {
         StructureProject.getActive().putMolecule(this);
     }
