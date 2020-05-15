@@ -47,9 +47,13 @@ public class RDCConstraintSet implements ConstraintSet, Iterable {
     boolean dirty = true;
     public static char[] violCharArray = new char[0];
     public static int ID = 1;
+    private static int count=0;
+    private int idNum;
 
     public RDCConstraintSet(String name) {
         this.name = name;
+        count++;
+        idNum=count;
     }
 
     public static RDCConstraintSet addSet(String name) {
@@ -63,6 +67,8 @@ public class RDCConstraintSet implements ConstraintSet, Iterable {
     public String getName() {
         return name;
     }
+
+    public int getId() {return idNum;}
 
     public static void reset() {
         for (Map.Entry<String, RDCConstraintSet> cSet : rdcSets().entrySet()) {

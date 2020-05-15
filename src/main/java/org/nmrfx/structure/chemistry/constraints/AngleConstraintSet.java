@@ -40,9 +40,13 @@ public class AngleConstraintSet implements ConstraintSet, Iterable {
     boolean dirty = true;
     public static char[] violCharArray = new char[0];
     public static int ID = 1;
+    private int idNum;
+    private static int count=0;
 
     public AngleConstraintSet(String name) {
         this.name = name;
+        count++;
+        idNum=count;
     }
 
     public static AngleConstraintSet addSet(String name) {
@@ -55,6 +59,10 @@ public class AngleConstraintSet implements ConstraintSet, Iterable {
 
     public String getName() {
         return name;
+    }
+
+    public int getId() {
+        return idNum;
     }
 
     public static void reset() {

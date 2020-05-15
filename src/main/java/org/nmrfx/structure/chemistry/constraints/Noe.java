@@ -134,6 +134,8 @@ public class Noe implements Constraint, Serializable {
     public static int ppmSet = 0;
     private PeakDim peakDim1=null;
     private PeakDim peakDim2=null;
+    public int starID;
+    public int starMemberId;
 
     public PeakDim getPeakDim1() {
         return peakDim1;
@@ -600,9 +602,11 @@ public class Noe implements Constraint, Serializable {
 
         //        Gen_dist_constraint.ID
         result.append(NoeSet.ID);
+        this.starID=NoeSet.ID;
         result.append(sep);
         //_Gen_dist_constraint.Member_ID
         result.append(NoeSet.memberID);
+        this.starMemberId=NoeSet.memberID;
         result.append(sep);
         //_Gen_dist_constraint.Member_logic_code
         result.append(logic);

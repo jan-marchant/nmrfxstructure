@@ -28,6 +28,8 @@ public interface ConstraintSet {
 
     public String getName();
 
+    public int getId();
+
     public int getSize();
 
     public void clear();

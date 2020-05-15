@@ -67,15 +67,21 @@ public class NoeSet implements ConstraintSet, Iterable {
     private boolean calibratable = true;
     private boolean dirty = true;
     private boolean useDistances = false;
+    private static int count=0;
+    private int idNum;
 
     public NoeSet(String name) {
         this.name = name;
+        count++;
+        idNum=count;
     }
 
     public NoeSet(String name,Molecule molecule,int ppmSet) {
         this.name = name;
         this.molecule=molecule;
         this.ppmSet=ppmSet;
+        count++;
+        idNum=count;
     }
 
     public static NoeSet addSet(String name) {
@@ -103,6 +109,14 @@ public class NoeSet implements ConstraintSet, Iterable {
 
     public String getName() {
         return name;
+    }
+
+    public int getId() {
+        return idNum;
+    }
+
+    public void setIdNum(int idNum) {
+        this.idNum = idNum;
     }
 
     public String getCategory() {
@@ -157,6 +171,15 @@ public class NoeSet implements ConstraintSet, Iterable {
 
     public ObservableList<Noe> get() {
         return constraints;
+    }
+
+    public Noe getByStarId(int idNum) {
+        for (Noe noe : constraints) {
+            if (noe.starID==idNum) {
+                return noe;
+            }
+        }
+        return null;
     }
 
     public static NoeSet getActiveSet() {
@@ -1126,5 +1149,4 @@ public class NoeSet implements ConstraintSet, Iterable {
         }
         return listCopy;
     }
-
 }
