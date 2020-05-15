@@ -22,7 +22,7 @@ import org.nmrfx.processor.datasets.peaks.PeakDim;
 import org.nmrfx.structure.chemistry.*;
 import org.nmrfx.processor.datasets.peaks.Peak;
 import org.nmrfx.processor.datasets.peaks.PeakList;
-import org.nmrfx.structure.utilities.Util;
+
 import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
@@ -132,17 +132,17 @@ public class Noe implements Constraint, Serializable {
     private static DisTypes distanceType = DisTypes.MINIMUM;
     private GenTypes genType = GenTypes.MANUAL;
     public static int ppmSet = 0;
-    private PeakDim peakDim1=null;
-    private PeakDim peakDim2=null;
+    private AtomResonance resonance1 =null;
+    private AtomResonance resonance2 =null;
     public int starID;
     public int starMemberId;
 
-    public PeakDim getPeakDim1() {
-        return peakDim1;
+    public AtomResonance getResonance1() {
+        return resonance1;
     }
 
-    public PeakDim getPeakDim2() {
-        return peakDim2;
+    public AtomResonance getResonance2() {
+        return resonance2;
     }
 
     public Noe(Peak p, SpatialSet sp1, SpatialSet sp2, double newScale) {
@@ -160,7 +160,7 @@ public class Noe implements Constraint, Serializable {
 
     }
 
-    public Noe(Peak p, SpatialSet sp1, SpatialSet sp2, double newScale, PeakDim pD1, PeakDim pD2) {
+    public Noe(Peak p, SpatialSet sp1, SpatialSet sp2, double newScale, AtomResonance res1, AtomResonance res2) {
         SpatialSetGroup spg1t = new SpatialSetGroup(sp1);
         SpatialSetGroup spg2t = new SpatialSetGroup(sp2);
         this.spg1 = spg1t;
@@ -172,10 +172,24 @@ public class Noe implements Constraint, Serializable {
         peak = p;
         scale = newScale;
         activeFlags = EnumSet.noneOf(Flags.class);
-        peakDim1=pD1;
-        peakDim2=pD2;
+        resonance1 = res1;
+        resonance2 = res2;
+    }
+
+    public Noe(Peak p, SpatialSetGroup spg1, SpatialSetGroup spg2, double newScale,AtomResonance res1,AtomResonance res2) {
+        this.spg1 = spg1;
+        this.spg2 = spg2;
+        if (spg1.compare(spg2) > 0) {
+            swapped = true;
+        }
+        peak = p;
+        scale = newScale;
+        activeFlags = EnumSet.noneOf(Flags.class);
+        resonance1 = res1;
+        resonance2 = res2;
 
     }
+
 
     public Noe(Peak p, SpatialSetGroup spg1, SpatialSetGroup spg2, double newScale) {
         this.spg1 = spg1;
@@ -614,12 +628,14 @@ public class Noe implements Constraint, Serializable {
         spg1.addToSTARString(result);
         result.append(sep);
         //_Gen_dist_constraint.Resonance_ID_1
-        result.append('.');
+        //result.append('.');
+        result.append(resonance1.getID());
         result.append(sep);
         spg2.addToSTARString(result);
         result.append(sep);
         //_Gen_dist_constraint.Resonance_ID_2
-        result.append('.');
+        //result.append('.');
+        result.append(resonance2.getID());
         result.append(sep);
         //_Gen_dist_constraint.Intensity_val
         result.append(intensity);
@@ -706,10 +722,10 @@ public class Noe implements Constraint, Serializable {
         this.peak=peak;
         for (PeakDim peakDim : peak.getPeakDims()) {
             if (((AtomResonance) peakDim.getResonance()).getAtom()==spg1.getAnAtom()) {
-                peakDim1=peakDim;
+                resonance1 =(AtomResonance) peakDim.getResonance();
             }
             if (((AtomResonance) peakDim.getResonance()).getAtom()==spg2.getAnAtom()) {
-                peakDim2=peakDim;
+                resonance2 =(AtomResonance) peakDim.getResonance();
             }
         }
     }

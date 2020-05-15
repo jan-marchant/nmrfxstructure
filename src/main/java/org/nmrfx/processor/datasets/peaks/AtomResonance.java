@@ -99,6 +99,11 @@ public class AtomResonance extends SimpleResonance {
             }
             if ((value = NvUtil.getColumnValue(nameColumn, i)) != null) {
                 resonance.setName(value);
+                Atom atom=Molecule.getAtomByName(value);
+                if (atom!=null) {
+                    resonance.setAtom(atom);
+                    atom.setResonance(resonance);
+                }
             }
 //            if ((value = NvUtil.getColumnValue(resSetColumn, i)) != null) {
 //                long resSet = NvUtil.toLong(value);
