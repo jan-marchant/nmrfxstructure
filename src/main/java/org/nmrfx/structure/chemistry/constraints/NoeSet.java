@@ -17,6 +17,8 @@
  */
 package org.nmrfx.structure.chemistry.constraints;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.nmrfx.processor.datasets.peaks.Peak;
 import org.nmrfx.processor.datasets.peaks.PeakList;
 import java.util.*;
@@ -40,6 +42,8 @@ import org.nmrfx.structure.utilities.Util;
  */
 public class NoeSet implements ConstraintSet, Iterable {
 
+    public Molecule molecule;
+    public int ppmSet=1;
     private static double SYM_BONUS = 10.0;
     private static double CMAX = 5.5;
     private static double CMAX_BONUS = 10.0;
@@ -52,7 +56,7 @@ public class NoeSet implements ConstraintSet, Iterable {
     static NoeSet ACTIVE_SET () {
         return StructureProject.getActive().ACTIVE_SET;
     }
-    private final List<Noe> constraints = new ArrayList<>(64);
+    private final ObservableList<Noe> constraints = FXCollections.observableArrayList();
     private final Map<Peak, List<Noe>> peakMap = new TreeMap<>();
     private final Map<PeakList, NoeCalibration> scaleMap = new HashMap<>();
     private final String name;
@@ -63,9 +67,21 @@ public class NoeSet implements ConstraintSet, Iterable {
     private boolean calibratable = true;
     private boolean dirty = true;
     private boolean useDistances = false;
+    private static int count=0;
+    private int idNum;
 
     public NoeSet(String name) {
         this.name = name;
+        count++;
+        idNum=count;
+    }
+
+    public NoeSet(String name,Molecule molecule,int ppmSet) {
+        this.name = name;
+        this.molecule=molecule;
+        this.ppmSet=ppmSet;
+        count++;
+        idNum=count;
     }
 
     public static NoeSet addSet(String name) {
@@ -93,6 +109,14 @@ public class NoeSet implements ConstraintSet, Iterable {
 
     public String getName() {
         return name;
+    }
+
+    public int getId() {
+        return idNum;
+    }
+
+    public void setIdNum(int idNum) {
+        this.idNum = idNum;
     }
 
     public String getCategory() {
@@ -145,8 +169,17 @@ public class NoeSet implements ConstraintSet, Iterable {
         dirty = true;
     }
 
-    public List<Noe> get() {
+    public ObservableList<Noe> get() {
         return constraints;
+    }
+
+    public Noe getByStarId(int idNum) {
+        for (Noe noe : constraints) {
+            if (noe.starID==idNum) {
+                return noe;
+            }
+        }
+        return null;
     }
 
     public static NoeSet getActiveSet() {
@@ -1116,5 +1149,4 @@ public class NoeSet implements ConstraintSet, Iterable {
         }
         return listCopy;
     }
-
 }

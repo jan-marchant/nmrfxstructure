@@ -32,7 +32,8 @@ public class ConstraintSTARWriter {
 
     public static void writeConstraintsSTAR3(FileWriter chan, ConstraintSet cSet, int setNum)
             throws IOException, InvalidPeakException {
-        String saveFrameName = cSet.getCategory() + setNum;
+        //String saveFrameName = cSet.getCategory() + setNum;
+        String saveFrameName = cSet.getCategory() + cSet.getName().replaceAll("\\W", "");
         String saveFrameCategory = cSet.getCategory();
         String thisCategory = cSet.getListType();
         String constraintType = cSet.getType();
@@ -43,6 +44,13 @@ public class ConstraintSTARWriter {
 
         chan.write(thisCategory + ".Sf_framecode   ");
         chan.write(saveFrameName + "\n");
+
+        chan.write(thisCategory + ".ID   ");
+        chan.write(cSet.getId() + "\n");
+
+
+        chan.write(thisCategory + ".Name           ");
+        chan.write("'"+cSet.getName() + "'\n");
 
         chan.write(thisCategory + ".Constraint_type   ");
         chan.write('\'' + constraintType + "\'\n");

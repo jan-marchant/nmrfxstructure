@@ -1380,7 +1380,7 @@ public class Atom implements IAtom {
     }
 
     public byte getElementNumber() {
-        return getElementNumber(name);
+        return getElementNumber(getElementName());
     }
 
     public static byte getElementNumber(String elemName) {

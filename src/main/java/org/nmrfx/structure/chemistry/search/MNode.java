@@ -22,7 +22,7 @@ import java.util.*;
 
 public class MNode implements Comparable, Comparator {
 
-    ArrayList nodes = null;
+    ArrayList<MNode> nodes = null;
     int id = -1;
     int shell = -1;
     int value = 0;
@@ -33,6 +33,20 @@ public class MNode implements Comparable, Comparator {
     int maxShell = 0;
     MNode lastRotatable = null;
     boolean ringClosure = false;
+
+    public ArrayList<MNode> getNodes() {
+        return nodes;
+    }
+
+    public void copy(MNode destination) {
+        destination.shell=shell;
+        destination.value=value;
+        destination.pathPos=pathPos;
+        destination.atom=atom;
+        destination.indexInShell=indexInShell;
+        destination.maxShell=maxShell;
+        destination.ringClosure=ringClosure;
+    }
 
     @Override
     public String toString() {
