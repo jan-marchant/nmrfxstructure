@@ -40,6 +40,9 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.EigenDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -498,6 +501,26 @@ public class Molecule implements Serializable, ITree {
             return ((Entity) entities.get(name));
         }
     }
+
+    public Entity getEntitiesAndResidues(String name) {
+        Pattern pattern = Pattern.compile("^([A-z0-9]+)(?::([A-z]+)([0-9]+))?$");
+        Matcher matcher = pattern.matcher(name);
+        if (!matcher.matches()) {
+            return null;
+        }
+        String entityName=matcher.group(1);
+        String resName=matcher.group(2);
+        String resNum=matcher.group(3);
+        Entity entity=entities.get(entityName);
+        if (resNum==null || resNum.isEmpty()) {
+            return entity;
+        }
+        if (entity instanceof Polymer) {
+            return ((Polymer) entity).getResidue(resNum);
+        }
+        return null;
+    }
+
 
     public Entity getChain(String name) {
         if (name == null) {

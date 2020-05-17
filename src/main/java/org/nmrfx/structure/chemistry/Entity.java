@@ -167,6 +167,10 @@ public class Entity implements AtomContainer, Serializable, ITree {
         return index;
     }
 
+    public String toString() {
+        return this.name;
+    }
+
     public static class EntityCommonName {
 
         String name = "";
