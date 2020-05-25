@@ -592,7 +592,7 @@ class MolPeakGen:
              
 	#print(self.vienna)
         ss = SSGen(self.mol, self.vienna)
-        ss.genRNAResidues()
+        ss.genRnaResidues()
         ss.pairTo()
         ss.secondaryStructGen()
 

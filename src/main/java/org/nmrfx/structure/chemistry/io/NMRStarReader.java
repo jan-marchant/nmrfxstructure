@@ -746,7 +746,7 @@ public class NMRStarReader {
             List<PeakDim> peakDims = resMap.get(resID);
             PeakDim firstPeakDim = peakDims.get(0);
             Resonance resonance = resFactory.build(resID);
-            firstPeakDim.setResonance(resonance);
+            //firstPeakDim.setResonance(resonance);
             resonance.add(firstPeakDim);
             if (peakDims.size() > 1) {
                 for (PeakDim peakDim : peakDims) {
