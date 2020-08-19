@@ -26,6 +26,7 @@ public class SmithWaterman {
     private final String aString;
     private final String bString;
     private static final double MISMATCH_PENALTY = -0.5333;
+    double GAP_OPENING_PENALTY=0;
     private final int nRows;
     private final int nCols;
     private final ArrayList<Integer> indexA = new ArrayList<Integer>();
@@ -34,6 +35,17 @@ public class SmithWaterman {
     private int offsetB = 0;
 
     public SmithWaterman(String aString, String bString) {
+        int n = aString.length();
+        int m = bString.length();
+        nRows = n + 1;
+        nCols = m + 1;
+        H = new double[1 + n][1 + m];
+        this.aString = aString;
+        this.bString = bString;
+    }
+
+    public SmithWaterman(String aString, String bString, double GAP_OPENING_PENALTY) {
+        this.GAP_OPENING_PENALTY=GAP_OPENING_PENALTY;
         int n = aString.length();
         int m = bString.length();
         nRows = n + 1;
@@ -101,6 +113,12 @@ public class SmithWaterman {
                 double c4 = 0.0;
 
                 c1 = H[i - 1][j - 1] + compareChar(aString.charAt(i - 1), bString.charAt(j - 1));
+                if (i>1 && j> 1) {
+                    if (aString.charAt(i - 1) != bString.charAt(j - 1) && aString.charAt(i - 2) == bString.charAt(j - 2)) {
+                        //gap opening penalty
+                        c1 += GAP_OPENING_PENALTY;
+                    }
+                }
                 c2 = Math.max(c2, H[i - 1][j] - gapScore(1));
                 c3 = Math.max(c3, H[i][j - 1] - gapScore(1));
 
