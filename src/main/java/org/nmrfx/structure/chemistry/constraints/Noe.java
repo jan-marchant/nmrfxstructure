@@ -598,7 +598,7 @@ public class Noe implements Constraint, Serializable {
 
     @Override
     public String toSTARString() {
-        if (peak != NoeSet.lastPeakWritten) {
+        if (peak == null || peak != NoeSet.lastPeakWritten) {
             NoeSet.ID++;
             NoeSet.lastPeakWritten = peak;
             NoeSet.memberID = 1;
